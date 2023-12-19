@@ -26,8 +26,9 @@ def upload_file(file_id, file_path, file_name):
 
     pdf = Pdf.create(id=file_id, name=file_name, user_id=g.user.id)
 
-    # TODO: Defer this to be processed by the worker
-    process_document(pdf.id)
+    # TODO: Defer this to be processed by the worker [DONE]
+    process_document.delay(pdf.id)
+        # create the job & send the job over to the worker to be processed over there. 
 
     return pdf.as_dict()
 

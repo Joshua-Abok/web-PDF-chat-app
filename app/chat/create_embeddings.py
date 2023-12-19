@@ -28,6 +28,15 @@ def create_embeddings_for_pdf(pdf_id: str, pdf_path: str):
     loader = PyPDFLoader(pdf_path)
     docs = loader.load_and_split(text_splitter)
 
+    # loop over all the created docs & update every doc metadata property
+    # metadata -> dict with page, text & pdf_id
+    for doc in docs: 
+        doc.metadata = {
+            "page": doc.metadata["page"], 
+            "text": doc.page_content, 
+            "pdf_id": pdf_id
+        }
+
     # print(docs)
     # add docs into vector_store & will use the embeddings object to create 
     # embeddings for each indiv docs & store the embeds with pinecone 

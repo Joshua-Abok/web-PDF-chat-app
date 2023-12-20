@@ -5,7 +5,7 @@ from langchain.prompts import ChatPromptTemplate
 from langchain.chains import LLMChain
 from langchain.callbacks.base import BaseCallbackHandler
 from dotenv import load_dotenv
-from langchain.schema.output import ChatGenerationChunk, GenerationChunk
+from langchain.schema.output import ChatGenerationChunk, GenerationChunk, LLMResult
 from queue import Queue
 from threading import Thread
 
@@ -20,6 +20,16 @@ class StreamingHandler(BaseCallbackHandler):
     def on_llm_new_token(self, token, **kwargs):
         # print(token)
         queue.put(token)
+
+    
+    def on_llm_end(self, response, **kwargs):
+        queue.put(None)
+
+    
+    def on_llm_error(self, error, **kwargs):
+        '''when something goes wrong'''
+        queue.put(None)
+    
 
 chat = ChatOpenAI(
     streaming=True,
@@ -68,6 +78,8 @@ class StreamingChain(LLMChain):
 
         while True: 
             token = queue.get()
+            if token is None: 
+                break
             yield token
 
 chain = StreamingChain(llm=chat, prompt=prompt) 

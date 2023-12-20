@@ -1,4 +1,4 @@
-
+from flask import current_app
 from queue import Queue
 from threading import Thread
 from app.chat.callbacks.stream import StreamingHandler
@@ -11,13 +11,15 @@ class StreamableChain:
         handler = StreamingHandler(queue)
 
 
-        def task(): 
+        def task(app_context): 
             """assign callbacks - every time run the chain 'input' 
-            we're going to use the 'isolated handler' """
+            we're going to use the 'isolated handler' 
+            Now receive app_context arg. passed in  """
+            app_context.push()  # give access(curr user, db, etc.) to context inside the thread
             self(input, callbacks=[handler]) # make sure call the chain itself as we call the stream itself
 
-
-        Thread(target=task).start()
+        # pass an arg to task func 
+        Thread(target=task, args=[current_app.app_context() ]).start()
 
 
         while True: 

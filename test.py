@@ -71,7 +71,7 @@ prompt = ChatPromptTemplate.from_messages([
 
     # 1. Need to override the chain's "stream" method
 # subclass LLMChain & override the "stream" function
-class StreamingChain(LLMChain): 
+class StreamableChain: 
     def stream(self, input): 
         '''every time called get isolated queue & handler'''
         queue = Queue()
@@ -92,6 +92,13 @@ class StreamingChain(LLMChain):
             if token is None: 
                 break
             yield token
+
+
+class StreamingChain(StreamableChain, LLMChain):
+    pass 
+
+# class StreamingConversationalRetrievalChain(StreamableChain, ConversationalRetrievalChain):
+#     pass
 
 chain = StreamingChain(llm=chat, prompt=prompt) 
 

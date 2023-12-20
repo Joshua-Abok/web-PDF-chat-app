@@ -13,27 +13,31 @@ from threading import Thread
 load_dotenv()
 
 #instance of Queue()
-queue = Queue()
+# queue = Queue()
 
 # class extend BaseCallbackHandler
 class StreamingHandler(BaseCallbackHandler): 
+    def __init__(self, queue): 
+        self.queue = queue   #isolating the queue
+
+
     def on_llm_new_token(self, token, **kwargs):
         # print(token)
-        queue.put(token)
+        self.queue.put(token)
 
     
     def on_llm_end(self, response, **kwargs):
-        queue.put(None)
+        self.queue.put(None)
 
     
     def on_llm_error(self, error, **kwargs):
         '''when something goes wrong'''
-        queue.put(None)
+        self.queue.put(None)
     
 
 chat = ChatOpenAI(
-    streaming=True,
-    callbacks=[StreamingHandler()]
+    streaming=True
+    # callbacks=[StreamingHandler()]      rem. don't want everyone using same handler
     )
 
 prompt = ChatPromptTemplate.from_messages([
@@ -69,8 +73,15 @@ prompt = ChatPromptTemplate.from_messages([
 # subclass LLMChain & override the "stream" function
 class StreamingChain(LLMChain): 
     def stream(self, input): 
+        '''every time called get isolated queue & handler'''
+        queue = Queue()
+        handler = StreamingHandler(queue)
+
+
         def task(): 
-            self(input) # make sure call the chain itself as we call the stream itself
+            """assign callbacks - every time run the chain 'input' 
+            we're going to use the 'isolated handler' """
+            self(input, callbacks=[handler]) # make sure call the chain itself as we call the stream itself
 
 
         Thread(target=task).start()

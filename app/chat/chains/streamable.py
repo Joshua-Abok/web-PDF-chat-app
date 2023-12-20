@@ -19,7 +19,7 @@ class StreamableChain:
             self(input, callbacks=[handler]) # make sure call the chain itself as we call the stream itself
 
         # pass an arg to task func 
-        Thread(target=task, args=[current_app.app_context() ]).start()
+        Thread(target=task, args=[current_app.app_context()]).start()
 
 
         while True: 

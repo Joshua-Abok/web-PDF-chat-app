@@ -25,7 +25,7 @@ def random_component_by_score(component_type, component_map):
         avg = score / count
         avg_scores[name] = max(avg, 0.1)
 
-    # print(avg_scores)
+    # print("these are AVG_SCORES", avg_scores)
 
     # Do a weighted random selection 
     sum_scores = sum(avg_scores.values())
